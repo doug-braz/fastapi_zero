@@ -69,13 +69,17 @@ def create_user(user: UserSchema, session: Session = Depends(get_session)):
 )
 def search_user(
     user_id: int,
+    session: Session = Depends(get_session),
 ):
-    if user_id < 1 or user_id > len(database):
+    user_db = session.scalar(select(User).where(User.id == user_id))
+
+    if not user_db:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail='User not found.',
         )
-    return database[user_id - 1]
+
+    return user_db
 
 
 @app.get('/users/', status_code=HTTPStatus.OK, response_model=UserList)
